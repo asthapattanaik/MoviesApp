@@ -18,13 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.moviesapp.navigation.NavRoutes
 import com.example.moviesapp.ui.components.MovieTile
 import com.example.moviesapp.ui.components.MoviesSearchBar
 import com.example.moviesapp.ui.models.Movie
 
 
 @Composable
-fun MoviesListScreen() {
+fun MoviesListScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
 
    // mock data
@@ -67,7 +69,10 @@ fun MoviesListScreen() {
                     imageUrl = movie.imageUrl,
                     title = movie.title,
                     posterWidth = 172.dp,
-                    posterHeight = 172.dp
+                    posterHeight = 172.dp,
+                    onClick = {
+                        navController.navigate(NavRoutes.movieDetailsScreen)
+                    }
                 )
             }
         }

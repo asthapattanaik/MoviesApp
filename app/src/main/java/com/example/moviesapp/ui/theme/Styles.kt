@@ -11,15 +11,15 @@ val textF16W500 = TextStyle(
     fontFamily = fontFamily,
 )
 
-val textF14W600 = TextStyle(
-    fontSize = 14.sp,
-    fontWeight = FontWeight.W600,
-    fontFamily = fontFamily
-)
-
 val textF16W400 = TextStyle(
     fontSize = 16.sp,
     fontWeight = FontWeight.W400,
+    fontFamily = fontFamily
+)
+
+val textF24W500 = TextStyle(
+    fontSize = 24.sp,
+    fontWeight = FontWeight.W500,
     fontFamily = fontFamily
 )
 

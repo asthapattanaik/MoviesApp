@@ -1,5 +1,6 @@
 package com.example.moviesapp.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -19,7 +20,11 @@ fun MovieTile(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ){
-    Column(modifier = modifier.padding(8.dp)) {
+    Column(modifier = modifier
+        .padding(8.dp)
+        .clickable(enabled = onClick != null) {
+            onClick?.invoke()
+        }) {
         MoviePoster(
             imageUrl = imageUrl,
             width = posterWidth,
