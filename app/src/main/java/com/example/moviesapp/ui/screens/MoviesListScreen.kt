@@ -18,6 +18,7 @@ import com.example.moviesapp.network.viewmodel.MoviesViewModel
 import com.example.moviesapp.ui.components.MovieTile
 import com.example.moviesapp.ui.components.MoviesSearchBar
 import com.example.moviesapp.navigation.NavRoutes
+import com.example.moviesapp.ui.components.NoMoviesFoundImage
 import com.example.moviesapp.utils.Response
 
 
@@ -54,27 +55,31 @@ fun MoviesListScreen(navController: NavController) {
                 val filteredMovies = movies.filter {
                     it.title.contains(searchQuery, ignoreCase = true)
                 }
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filteredMovies) { movie ->
-                        Log.d("image url","${movie.posterPath.toString()}")
-                        MovieTile(
-                            imageUrl = movie.posterPath.toString(),
-                            title = movie.title,
-                            posterWidth = 172.dp,
-                            posterHeight = 172.dp,
-                            onClick = {
-                                navController.navigate(NavRoutes.movieDetailsScreenRoute(movie.posterPath.toString(), movie.title, movie.overview))
-                            }
-                        )
+                if (filteredMovies.isEmpty()){
+                    NoMoviesFoundImage()
+                }
+                else{
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredMovies) { movie ->
+                            MovieTile(
+                                imageUrl = movie.posterPath.toString(),
+                                title = movie.title,
+                                posterWidth = 172.dp,
+                                posterHeight = 172.dp,
+                                onClick = {
+                                    navController.navigate(NavRoutes.movieDetailsScreenRoute(movie.posterPath.toString(), movie.title, movie.overview))
+                                }
+                            )
+                        }
                     }
                 }
+
             }
 
             is Response.Error -> {

@@ -12,7 +12,7 @@ interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<MovieEntity>)
 
-    @Query("SELECT * FROM movies")
+    @Query("SELECT * FROM movies ORDER BY voteAverage DESC")
     fun getAllMovies(): Flow<List<MovieEntity>>
 
     @Query("DELETE FROM movies")

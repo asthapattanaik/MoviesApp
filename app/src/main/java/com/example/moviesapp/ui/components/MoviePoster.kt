@@ -1,9 +1,8 @@
 package com.example.moviesapp.ui.components
 
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -18,13 +17,32 @@ fun MoviePoster(
     height: Dp,
     modifier: Modifier = Modifier
 ) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
+    var isLoading by remember { mutableStateOf(true) }
+    var isError by remember { mutableStateOf(false) }
+
+    Box(
         modifier = modifier
             .width(width)
             .height(height)
             .clip(RoundedCornerShape(12.dp))
-    )
+    ) {
+        when {
+            isLoading -> ShimmerLoadingBox()
+
+            isError -> ErrorBox(width, height)
+        }
+
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize(),
+            onLoading = { isLoading = true },
+            onSuccess = { isLoading = false },
+            onError = {
+                isLoading = false
+                isError = true
+            }
+        )
+    }
 }

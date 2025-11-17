@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -21,6 +22,11 @@ import com.example.moviesapp.ui.theme.grey9AA4B2
 import com.example.moviesapp.ui.theme.white
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.onFocusChanged
 import com.example.moviesapp.ui.theme.greyE3E8EF
 import com.example.moviesapp.ui.theme.textF16W400
 
@@ -29,6 +35,8 @@ fun MoviesSearchBar(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,30 +57,41 @@ fun MoviesSearchBar(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    isFocused = focusState.isFocused
+                },
             decorationBox = { innerTextField ->
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        modifier = Modifier.height(24.dp)
-                            .width(24.dp),
                         contentDescription = "Search",
-                        tint = grey9AA4B2
+                        tint = grey9AA4B2,
+                        modifier = Modifier.size(24.dp)
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    if (value.isEmpty()) {
-                        Text(
-                            text = "Search movies",
-                            color = grey9AA4B2,
-                            style = textF16W400
-                        )
-                    }
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        // Hide placeholder when focused or typing
+                        if (!isFocused && value.isEmpty()) {
+                            Text(
+                                text = "Search movies",
+                                color = grey9AA4B2,
+                                style = textF16W400
+                            )
+                        }
 
-                    innerTextField()
+                        innerTextField()
+                    }
                 }
             }
         )
