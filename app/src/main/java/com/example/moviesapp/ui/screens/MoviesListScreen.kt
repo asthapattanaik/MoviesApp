@@ -1,55 +1,42 @@
 package com.example.moviesapp.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.moviesapp.navigation.NavRoutes
+import com.example.moviesapp.network.viewmodel.MoviesViewModel
 import com.example.moviesapp.ui.components.MovieTile
 import com.example.moviesapp.ui.components.MoviesSearchBar
-import com.example.moviesapp.models.MovieModel
-
+import com.example.moviesapp.navigation.NavRoutes
+import com.example.moviesapp.utils.Response
 
 @Composable
 fun MoviesListScreen(navController: NavController) {
+    // Initialize ViewModel internally
+    val viewModel: MoviesViewModel = hiltViewModel()
+
     var searchQuery by remember { mutableStateOf("") }
 
-   // mock data
-    val movies = listOf(
-        MovieModel("Doctor Strange", "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"),
-        MovieModel("Interstellar", "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"),
-        MovieModel("The Dark Knight", "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"),
-        MovieModel("Avatar", "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg"),
-        MovieModel("Inception", "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"),
-        MovieModel("Interstellar", "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"),
-        MovieModel("The Dark Knight", "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"),
-        MovieModel("Avatar", "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg")
-    )
+    val trendingMoviesResponse by viewModel.trendingMovies.collectAsState()
 
-    val filteredMovies = movies.filter {
-        it.title.contains(searchQuery, ignoreCase = true)
+    LaunchedEffect(Unit) {
+        viewModel.loadTrendingMovies()
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .systemBarsPadding()
-            .padding(16.dp)) {
-
+            .padding(16.dp)
+    ) {
         MoviesSearchBar(
             value = searchQuery,
             onValueChange = { searchQuery = it }
@@ -57,23 +44,44 @@ fun MoviesListScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(4.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(filteredMovies) { movie ->
-                MovieTile(
-                    imageUrl = movie.imageUrl,
-                    title = movie.title,
-                    posterWidth = 172.dp,
-                    posterHeight = 172.dp,
-                    onClick = {
-                        navController.navigate(NavRoutes.movieDetailsScreen)
+        when (val response = trendingMoviesResponse) {
+            is Response.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is Response.Success -> {
+                val movies = response.data?.results ?: emptyList()
+                val filteredMovies = movies.filter {
+                    it.title.contains(searchQuery, ignoreCase = true)
+                }
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredMovies) { movie ->
+                        MovieTile(
+                            imageUrl = movie.poster_path.toString(),
+                            title = movie.title,
+                            posterWidth = 172.dp,
+                            posterHeight = 172.dp,
+                            onClick = {
+                                navController.navigate(NavRoutes.movieDetailsScreen)
+                            }
+                        )
                     }
-                )
+                }
+            }
+
+            is Response.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Error: Something went wrong. Please try again later.")
+                }
             }
         }
     }

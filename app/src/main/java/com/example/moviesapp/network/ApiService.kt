@@ -1,5 +1,6 @@
 package com.example.moviesapp.network
 
+import com.example.moviesapp.models.ConfigurationResponse
 import com.example.moviesapp.models.TrendingMoviesResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -12,5 +13,8 @@ interface ApiService {
         @Path("time_window") timeWindow: String = "week",
         @Query("language") language: String = "en-US"
     ): TrendingMoviesResponse
+
+    @GET("configuration")
+    suspend fun getImageConfiguration() : ConfigurationResponse
 }
 

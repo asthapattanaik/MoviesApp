@@ -1,44 +1,36 @@
 package com.example.moviesapp.network.viewmodel
 
-
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviesapp.models.TrendingMoviesResponse
-import com.example.moviesapp.domain.usecase.GetTrendingMoviesUsecase
+import com.example.moviesapp.network.repository.MoviesRepository
 import com.example.moviesapp.utils.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
-    private val getTrendingMoviesUsecase: GetTrendingMoviesUsecase
+    private val repository: MoviesRepository
 ) : ViewModel() {
 
-    private val _state = MutableLiveData<Response<TrendingMoviesResponse>>()
-    val state: LiveData<Response<TrendingMoviesResponse>> = _state
+    private val _trendingMovies = MutableStateFlow<Response<TrendingMoviesResponse>>(Response.Loading())
+    val trendingMovies: StateFlow<Response<TrendingMoviesResponse>> = _trendingMovies
 
-    init {
-        fetchTrendingMovies()
-    }
-
-    private fun fetchTrendingMovies() {
-        _state.value = Response.Loading()
-
+    fun loadTrendingMovies() {
         viewModelScope.launch {
+            _trendingMovies.value = Response.Loading()
+
             try {
-                val response = getTrendingMoviesUsecase()
-                _state.postValue(Response.Success(response))
+                val result = repository.getTrendingMovies()
+                Log.d("VIEWMODEL Result→", "$result")
+                _trendingMovies.value = result
             } catch (e: Exception) {
-                _state.postValue(Response.Error(e.localizedMessage ?: "Something went wrong"))
+                _trendingMovies.value = Response.Error(e.localizedMessage ?: "Unknown Error")
             }
         }
     }
 }
-
-
-

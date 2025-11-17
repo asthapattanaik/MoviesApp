@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +11,15 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
+
+val secretPropertiesFile = rootProject.file("secrets.properties")
+val secretProperties = Properties()
+
+if (secretPropertiesFile.exists()) {
+    secretProperties.load(FileInputStream(secretPropertiesFile))
+} else {
+    throw GradleException("secret.properties file not found! Create it at the project root.")
+}
 android {
     namespace = "com.example.moviesapp"
     compileSdk = 36
@@ -19,9 +31,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "TMDB_API_KEY", "\"${secretProperties["TMDB_API_KEY"]}\"")
+        buildConfigField("String", "BASE_URL", "\"${secretProperties["BASE_URL"]}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "TMDB_API_KEY", "\"${properties["TMDB_API_KEY"]}\"")
-        buildConfigField("String", "BASE_URL", "\"${properties["BASE_URL"]}\"")
     }
 
     buildTypes {

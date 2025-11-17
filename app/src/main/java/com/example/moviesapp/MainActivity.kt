@@ -10,7 +10,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.moviesapp.navigation.NavRoutes
 import com.example.moviesapp.ui.screens.MovieDetailsScreen
 import com.example.moviesapp.ui.screens.MoviesListScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
