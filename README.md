@@ -6,7 +6,7 @@ The app fetches trending movies from TMDB, supports **search** and **offline cac
 ---
 ## 📹 Movies App Demo Recording
 
-👉 **[Click to view app demo with sound on]()**
+👉 **[Click to view app demo with sound on](https://drive.google.com/file/d/1OvRIJrGr9hLM8iFQYhLmsDurkOKsr2mr/view?usp=drive_link)**
 
 
 ## Features
