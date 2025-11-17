@@ -1,5 +1,6 @@
 package com.example.moviesapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -12,24 +13,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.moviesapp.data.local.MovieEntity
 import com.example.moviesapp.network.viewmodel.MoviesViewModel
 import com.example.moviesapp.ui.components.MovieTile
 import com.example.moviesapp.ui.components.MoviesSearchBar
 import com.example.moviesapp.navigation.NavRoutes
 import com.example.moviesapp.utils.Response
 
+
 @Composable
 fun MoviesListScreen(navController: NavController) {
-    // Initialize ViewModel internally
     val viewModel: MoviesViewModel = hiltViewModel()
 
     var searchQuery by remember { mutableStateOf("") }
 
     val trendingMoviesResponse by viewModel.trendingMovies.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadTrendingMovies()
-    }
 
     Column(
         modifier = Modifier
@@ -52,7 +50,7 @@ fun MoviesListScreen(navController: NavController) {
             }
 
             is Response.Success -> {
-                val movies = response.data?.results ?: emptyList()
+                val movies = response.data ?: emptyList()
                 val filteredMovies = movies.filter {
                     it.title.contains(searchQuery, ignoreCase = true)
                 }
@@ -65,13 +63,14 @@ fun MoviesListScreen(navController: NavController) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(filteredMovies) { movie ->
+                        Log.d("image url","${movie.posterPath.toString()}")
                         MovieTile(
-                            imageUrl = movie.poster_path.toString(),
+                            imageUrl = movie.posterPath.toString(),
                             title = movie.title,
                             posterWidth = 172.dp,
                             posterHeight = 172.dp,
                             onClick = {
-                                navController.navigate(NavRoutes.movieDetailsScreen)
+                                navController.navigate(NavRoutes.movieDetailsScreenRoute(movie.posterPath.toString(), movie.title, movie.overview))
                             }
                         )
                     }

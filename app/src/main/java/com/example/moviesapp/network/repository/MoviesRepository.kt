@@ -1,35 +1,52 @@
 package com.example.moviesapp.network.repository
 
-import com.example.moviesapp.models.TrendingMoviesResponse
+import com.example.moviesapp.data.local.MovieDao
+import com.example.moviesapp.data.local.MovieEntity
 import com.example.moviesapp.network.ApiService
 import com.example.moviesapp.utils.Response
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class MoviesRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val movieDao: MovieDao
 ) {
 
-    suspend fun getTrendingMovies(): Response<TrendingMoviesResponse> {
-        return try {
-            val configuration = apiService.getImageConfiguration()
-            val baseUrl = configuration.images.secureBaseUrl
-            val posterSize = configuration.images.posterSizes.getOrNull(4) ?: "w500" // w500 as default
+    fun getTrendingMovies(): Flow<Response<List<MovieEntity>>> = flow {
+        emit(Response.Loading())
+
+        try {
+            val config = apiService.getImageConfiguration()
+            val baseUrl = config.images.secureBaseUrl
+            val posterSize = config.images.posterSizes.getOrNull(4) ?: "w500"
 
             val response = apiService.getTrendingMovies()
 
-            val moviesWithFullPoster = response.results.map { movie ->
-                movie.copy(
-                    poster_path = movie.poster_path?.let { "$baseUrl$posterSize$it" }
+            val movies = response.results.map { dto ->
+                MovieEntity(
+                    id = dto.id,
+                    title = dto.title,
+                    overview = dto.overview,
+                    posterPath = dto.poster_path?.let { "$baseUrl$posterSize$it" },
+                    voteAverage = dto.vote_average,
+                    releaseDate = dto.release_date
                 )
             }
 
-            val responseWithFullPoster = response.copy(results = moviesWithFullPoster)
+            movieDao.clearMovies()
+            movieDao.insertMovies(movies)
 
-            Response.Success(responseWithFullPoster)
+            emit(Response.Success(movies))
 
         } catch (e: Exception) {
-            println("API ERROR : ${e.message}")
-            Response.Error("Failed to load trending movies: ${e.message}")
+            val cachedMovies = movieDao.getAllMovies().first()
+            if (cachedMovies.isNotEmpty()) {
+                emit(Response.Success(cachedMovies))
+            } else {
+                emit(Response.Error("Failed: ${e.message}"))
+            }
         }
     }
 }

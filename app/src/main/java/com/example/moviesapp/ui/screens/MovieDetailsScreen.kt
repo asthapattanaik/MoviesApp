@@ -28,7 +28,10 @@ import com.example.moviesapp.ui.theme.textF24W500
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieDetailsScreen(navController: NavController) {
+fun MovieDetailsScreen(navController: NavController,
+                       imageUrl : String,
+                       title : String,
+                       description: String) {
 
     Scaffold(
         topBar = {
@@ -62,7 +65,7 @@ fun MovieDetailsScreen(navController: NavController) {
         ) {
 
             MoviePoster(
-                imageUrl = "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+                imageUrl = imageUrl,
                 height = 360.dp,
                 width = 360.dp
             )
@@ -70,14 +73,14 @@ fun MovieDetailsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                "Interstellar",
+                title,
                 style = textF24W500.copy(color = black)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "During World War II, Lt. Gen. Leslie Groves Jr. appoints physicist J. Robert Oppenheimer",
+                text = description,
                 style = textF16W400.copy(color = black)
             )
 
